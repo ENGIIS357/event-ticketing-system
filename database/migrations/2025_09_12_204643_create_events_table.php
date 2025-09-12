@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('events', function (Blueprint $table) {
-            $table->id();
-        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // منظم الفعالية
-        $table->string('title');
+       $table->id();
+       $table->foreignId('user_id')->constrained()->onDelete('cascade');
+       $table->string('title');
         $table->text('description');
         $table->dateTime('start_date');
         $table->dateTime('end_date');
@@ -24,6 +24,7 @@ return new class extends Migration
         $table->string('image')->nullable(); // لرفع صورة الفعالية لاحقًا
         $table->timestamps();
     });
+    
     }
 
     /**
