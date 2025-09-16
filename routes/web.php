@@ -25,3 +25,21 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+// ==============================================
+// مسارات API بديلة (لحل مشكلة routes/api.php)
+// ==============================================
+
+Route::get('/api/test', function () {
+    return response()->json(['message' => 'API is working from web.php!']);
+});
+
+Route::get('/api/v1/simple-test', function () {
+    return response()->json(['message' => 'V1 is working from web.php!']);
+});
+
+Route::get('/api/v1/events', [App\Http\Controllers\Api\EventController::class, 'index']);
+Route::get('/api/v1/events/{event}', [App\Http\Controllers\Api\EventController::class, 'show']);
+
+Route::get('/events', function () {
+    return inertia('Events/Index');
+})->middleware(['auth', 'verified'])->name('events.index');
