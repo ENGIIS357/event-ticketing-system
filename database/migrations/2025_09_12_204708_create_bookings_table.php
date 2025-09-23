@@ -20,6 +20,7 @@ return new class extends Migration
         $table->decimal('total_amount', 10, 2);
         $table->string('status')->default('confirmed');
         $table->timestamps();
+        $table->dateTime('date');
     });
     }
 

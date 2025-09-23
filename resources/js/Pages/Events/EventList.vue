@@ -24,7 +24,7 @@
 
 <script>
 import CreateEventForm from './CreateEventForm.vue';
-
+import EventsList from '@/Components/Events/EventsList.vue';
 export default {
   components: {
     CreateEventForm
