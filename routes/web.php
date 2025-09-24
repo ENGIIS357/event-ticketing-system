@@ -39,7 +39,7 @@ Route::middleware('auth')->group(function () {
 });
 // routes/api.php
 
-use App\Http\Controllers\Api\EventController;
+
 
 // Group routes under /api/v1 prefix for versioning
 Route::group(['prefix' => 'v1'], function () {
