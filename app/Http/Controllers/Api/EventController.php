@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 class EventController extends Controller
 {
     // جلب كل الفعاليات
-    public function index(): JsonResponse
+   public function index(): JsonResponse
 {
     $events = Event::with('user:id,name')->get();
 
@@ -23,6 +23,15 @@ class EventController extends Controller
         'current_user_id' => $currentUserId
     ], 200);
 }
+public function uploadImage(Request $request, Event $event)
+{
+    $request->validate(['image' => 'required|image|max:2048']);
+    $path = $request->file('image')->store('events', 'public');
+    $event->image = $path;
+    $event->save();
+    return response()->json($event, 200);
+}
+
 
     // إنشاء فعالية جديدة
     public function store(Request $request): JsonResponse

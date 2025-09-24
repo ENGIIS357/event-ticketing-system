@@ -63,6 +63,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // تخزين فعالية جديدة
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
+// تعديل فعالية
+Route::middleware(['auth', 'verified'])->put('/api/v1/events/{event}', [EventController::class, 'update'])
+    ->name('events.update');
 
     // صفحة الطلبات (Orders)
     // Route::get('/orders', function () {
@@ -88,6 +91,14 @@ Route::get('/api/v1/events/{event}', [EventController::class, 'show']);
 Route::post('/api/v1/events', [App\Http\Controllers\Api\EventController::class, 'store']);
 // حذف حدث (auth:sanctum)
 Route::middleware('auth:sanctum')->delete('/api/v1/events/{event}', [EventController::class, 'destroy']);
+Route::post('/events/{event}/upload', [EventController::class, 'uploadImage']);
+
+//Route::middleware('auth:sanctum')->patch('/api/v1/events/{event}', [EventController::class, 'update']);
+// تعديل حدث (PUT أو PATCH)
+Route::middleware('auth:sanctum')->put('/api/v1/events/{event}', [EventController::class, 'update']);
+
+// أو لو تحب تدعم PATCH كمان
+Route::middleware(['auth', 'verified'])->patch('/api/v1/events/{event}', [EventController::class, 'update']);
 
 // استدعاء auth routes
 require __DIR__.'/auth.php';

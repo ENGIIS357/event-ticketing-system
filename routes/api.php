@@ -20,3 +20,4 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->delete('/api/v1/events/{event}', [EventController::class, 'destroy']);
 
 });
+Route::post('/events/{event}/upload', [EventController::class, 'uploadImage']);
