@@ -6,103 +6,127 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): JsonResponse
-    {
-        // جلب جميع الفعاليات مع علاقاتها (مثل المستخدم) باستخدام التحميل المبكر
-        $events = Event::with('user:id,name')->get(); // جلب فقط id و name من المستخدم
+    // جلب كل الفعاليات
+   public function index(): JsonResponse
+{
+    $events = Event::with('user:id,name')->get();
 
-        return response()->json([
-            'events' => $events
-        ], 200);
-    }
+    // إضافة معرف المستخدم الحالي
+    $currentUserId = auth()->check() ? auth()->id() : null;
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    return response()->json([
+        'events' => $events,
+        'current_user_id' => $currentUserId
+    ], 200);
+}
+public function uploadImage(Request $request, Event $event)
+{
+    $request->validate(['image' => 'required|image|max:2048']);
+    $path = $request->file('image')->store('events', 'public');
+    $event->image = $path;
+    $event->save();
+    return response()->json($event, 200);
+}
+
+
+    // إنشاء فعالية جديدة
     public function store(Request $request): JsonResponse
     {
-        // تحقق من صحة البيانات
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'location' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'available_tickets' => 'required|integer|min:1'
+        Log::info('محاولة إضافة فعالية جديدة', [
+            'user' => $request->user() ? $request->user()->id : 'غير مسجل',
+            'data' => $request->all()
         ]);
 
-        // إنشاء الفعالية وربطها بالمستخدم المسجل حالياً
-        $event = $request->user()->events()->create($validatedData);
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'required|string',
+                'location' => 'required|string|max:255',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date',
+                'price' => 'required|numeric|min:0',
+                'available_tickets' => 'required|integer|min:1',
+            ]);
 
-        return response()->json([
-            'message' => 'Event created successfully!',
-            'event' => $event
-        ], 201); // 201 Created
+            $userId = $request->user() ? $request->user()->id : 1;
+
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('events', 'public');
+                $validated['image'] = $path;
+            }
+
+            $event = Event::create(array_merge($validated, ['user_id' => $userId]));
+
+            Log::info('تم إنشاء الفعالية بنجاح', ['event_id' => $event->id]);
+
+            return response()->json([
+                'message' => 'تمت إضافة الفعالية بنجاح!',
+                'event' => $event->load('user:id,name')
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('خطأ في التحقق: ' . json_encode($e->errors()));
+            return response()->json([
+                'message' => 'خطأ في التحقق من البيانات',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('خطأ في الخادم: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'خطأ في الخادم: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // عرض فعالية محددة
     public function show(Event $event): JsonResponse
     {
-        // جلب الفعالية مع علاقاتها
         $event->load('user:id,name', 'tickets');
-
-        return response()->json([
-            'event' => $event
-        ], 200);
+        return response()->json(['event' => $event], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Event $event): JsonResponse
-    {
-        // تحقق من الصلاحية - فقط صاحب الفعالية يمكنه التعديل
-        // (سيتم تطبيق Politices بشكل كامل لاحقاً)
-        if ($request->user()->id !== $event->user_id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+    // تعديل فعالية
+   public function update(Request $request, Event $event): JsonResponse
+{
+    $validatedData = $request->validate([
+        'title' => 'sometimes|string|max:255',
+        'description' => 'sometimes|string',
+        'start_date' => 'sometimes|date',
+        'end_date' => 'sometimes|date|after_or_equal:start_date',
+        'location' => 'sometimes|string|max:255',
+        'price' => 'sometimes|numeric|min:0',
+        'available_tickets' => 'sometimes|integer|min:1',
+        'image' => 'nullable|image|max:2048',
+    ]);
 
-        $validatedData = $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string',
-            'start_date' => 'sometimes|date',
-            'end_date' => 'sometimes|date|after:start_date',
-            'location' => 'sometimes|string|max:255',
-            'price' => 'sometimes|numeric|min:0',
-            'available_tickets' => 'sometimes|integer|min:1'
-        ]);
-
-        $event->update($validatedData);
-
-        return response()->json([
-            'message' => 'Event updated successfully!',
-            'event' => $event
-        ], 200);
+    if ($request->hasFile('image')) {
+        $path = $request->file('image')->store('events', 'public');
+        $validatedData['image'] = $path;
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    $event->update($validatedData);
+
+    return response()->json([
+        'message' => 'تم تعديل الفعالية بنجاح!',
+        'event' => $event
+    ], 200);
+}
+
+
+    // حذف فعالية
     public function destroy(Request $request, Event $event): JsonResponse
     {
-        // تحقق من الصلاحية - فقط صاحب الفعالية يمكنه الحذف
-        if ($request->user()->id !== $event->user_id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        try {
+            $event->delete();
+            return response()->json(['message' => 'تم حذف الفعالية بنجاح'], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'خطأ في الخادم: ' . $e->getMessage()
+            ], 500);
         }
-
-        $event->delete();
-
-        return response()->json([
-            'message' => 'Event deleted successfully!'
-        ], 200); // أو 204 No Content
     }
 }
