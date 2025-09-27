@@ -1,227 +1,297 @@
 <template>
-<<<<<<< HEAD
+  <Head title="إدارة الفعاليات" />
+
   <AuthenticatedLayout>
-    <Head title="الفعاليات" />
-    
     <template #header>
-      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-        إدارة الفعاليات
-      </h2>
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-right">
+        <div class="text-center w-full md:text-right md:w-auto">
+          <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-1">إدارة الفعاليات</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-300">قم بإدارة فعالياتك بكل سهولة</p>
+        </div>
+        <div class="w-full md:w-auto flex justify-center md:justify-end">
+          <button @click="$inertia.visit('/events/create')"
+                  class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-teal-600 text-white px-5 py-3 rounded-lg hover:from-green-600 hover:to-teal-700 transition-all duration-300 shadow-md text-base font-medium">
+            <span class="text-lg">+</span>
+            إضافة فعالية جديدة
+          </button>
+        </div>
+      </div>
     </template>
 
-    <div class="py-12">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <EventList />
+    <div class="py-4 md:py-6">
+      <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+
+        <!-- حالة التحميل -->
+        <div v-if="loading" class="flex justify-center items-center py-12 md:py-20 text-right">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-3"></div>
+            <p class="text-gray-600 dark:text-gray-300 text-sm md:text-base">جاري تحميل الفعاليات...</p>
+          </div>
+        </div>
+
+        <!-- حالة الخطأ -->
+        <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 md:p-6 text-center">
+          <div class="text-red-500 text-3xl md:text-4xl mb-2">❌</div>
+          <h3 class="text-red-800 dark:text-red-300 text-base md:text-lg font-semibold mb-2">حدث خطأ</h3>
+          <p class="text-red-700 dark:text-red-400 text-sm md:text-base">{{ error }}</p>
+          <button @click="fetchEvents" class="mt-3 bg-red-500 text-white px-4 py-2 rounded text-sm hover:bg-red-600 transition-colors">
+            إعادة المحاولة
+          </button>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
+        <div v-else>
+          <!-- البحث والتصفية -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg p-3 md:p-4 shadow-sm border border-gray-200 dark:border-gray-700 mb-4 md:mb-6 text-right">
+            <div class="flex flex-col md:flex-row gap-3 md:gap-4 items-center">
+              <div class="flex-1 w-full relative">
+                <span class="absolute left-3 top-2.5 md:top-3 text-gray-400 text-sm">🔍</span>
+                <input v-model="searchQuery" type="text" placeholder="ابحث في الفعاليات..." 
+                       class="w-full pr-3 pl-9 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg 
+                              dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 text-right"
+                       dir="rtl">
+              </div>
+
+              <select v-model="filterStatus" 
+                      class="w-full md:w-auto px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-right"
+                      dir="rtl">
+                <option value="all">جميع الفعاليات</option>
+                <option value="active">فعاليات قادمة</option>
+                <option value="past">فعاليات منتهية</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- إحصائيات سريعة -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+            <div class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-lg p-3 text-center">
+              <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ events.length }}</div>
+              <div class="text-xs md:text-sm text-gray-600 dark:text-gray-300">إجمالي الفعاليات</div>
+            </div>
+            <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-lg p-3 text-center">
+              <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ activeEventsCount }}</div>
+              <div class="text-xs md:text-sm text-gray-600 dark:text-gray-300">فعاليات قادمة</div>
+            </div>
+            <div class="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-lg p-3 text-center">
+              <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ totalTickets }}</div>
+              <div class="text-xs md:text-sm text-gray-600 dark:text-gray-300">إجمالي التذاكر</div>
+            </div>
+            <div class="bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 rounded-lg p-3 text-center">
+              <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ totalRevenue }}</div>
+              <div class="text-xs md:text-sm text-gray-600 dark:text-gray-300">إجمالي الإيرادات</div>
+            </div>
+          </div>
+
+          <!-- قائمة الفعاليات -->
+          <div v-if="filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div v-for="event in filteredEvents" :key="event.id" 
+                 class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 
+                        hover:shadow-lg transition-all duration-300 text-right overflow-hidden">
+
+              <!-- شريط الحالة -->
+              <div :class="`h-1.5 ${ new Date(event.start_date) > new Date() ? 'bg-gradient-to-r from-green-500 to-teal-500' : 'bg-gray-400' }`"></div>
+
+              <div class="p-4 md:p-5">
+                <div class="flex justify-between items-start mb-3">
+                  <h3 class="text-base md:text-lg font-semibold text-gray-800 dark:text-white line-clamp-1 text-right w-full">{{ event.title }}</h3>
+                  <span :class="`px-2 py-1 rounded-full text-xs font-medium ${
+                    new Date(event.start_date) > new Date() 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' 
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-300'
+                  }`">
+                    {{ new Date(event.start_date) > new Date() ? 'قادمة' : 'منتهية' }}
+                  </span>
+                </div>
+
+                <p class="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-2 text-right">{{ event.description || 'لا يوجد وصف' }}</p>
+
+                <div class="space-y-2 text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  <div class="flex items-center gap-2 justify-end text-right">
+                    <span class="truncate">{{ event.location || 'غير محدد' }}</span>
+                    <span class="text-gray-400">📍</span>
+                  </div>
+                  <div class="flex items-center gap-2 justify-end text-right">
+                    <span>{{ formatDate(event.start_date) }}</span>
+                    <span class="text-gray-400">📅</span>
+                  </div>
+                  <div class="flex items-center gap-2 justify-end text-right">
+                    <span>{{ event.price || 0 }} ر.س</span>
+                    <span class="text-gray-400">💰</span>
+                  </div>
+                  <div class="flex items-center gap-2 justify-end text-right">
+                    <span>{{ event.available_tickets || 0 }} تذكرة</span>
+                    <span class="text-gray-400">🎫</span>
+                  </div>
+                </div>
+
+                <!-- أزرار التحكم -->
+                <div class="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-600">
+                  <button @click="viewEvent(event)" 
+                          class="flex-1 bg-gray-500 text-white py-2 px-3 rounded-lg hover:bg-gray-600 transition-colors flex items-center justify-center gap-1 text-sm font-medium">
+                    <span>👁️</span>
+                    عرض
+                  </button>
+                  <button @click="editEvent(event)" 
+                          class="flex-1 bg-blue-500 text-white py-2 px-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-1 text-sm font-medium">
+                    <span>✏️</span>
+                    تعديل
+                  </button>
+                  <button v-if="event.user.id === currentUserId" @click="deleteEvent(event.id)" 
+                          class="flex-1 bg-red-500 text-white py-2 px-3 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-1 text-sm font-medium">
+                    <span>🗑️</span>
+                    حذف
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="text-center py-8 md:py-12 text-right">
+            <div class="text-4xl md:text-6xl mb-3">🎪</div>
+            <h3 class="text-lg md:text-xl font-semibold text-gray-700 dark:text-gray-300">لا توجد فعاليات</h3>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 mb-4 text-sm md:text-base">ابدأ بإضافة أول فعالية لك</p>
+            <button @click="$inertia.visit('/events/create')" 
+                    class="bg-gradient-to-r from-green-500 to-teal-600 text-white px-5 py-3 rounded-lg hover:from-green-600 hover:to-teal-700 transition-all duration-300 text-base font-medium">
+              إضافة فعالية جديدة
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </AuthenticatedLayout>
 </template>
 
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import EventList from '@/Components/Events/EventList.vue';
-</script>
-=======
-  <div class="container mx-auto px-4 py-8" dir="rtl">
-    <!-- رأس الصفحة -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-gray-800">الفعاليات</h1>
-      <button @click="router.visit('/events/create')"
-              class="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
-        + إضافة فعالية جديدة
-      </button>
-    </div>
-
-    <!-- حالة التحميل -->
-    <div v-if="loading" class="text-center py-8">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-      <p class="mt-2 text-gray-600">جاري تحميل الفعاليات...</p>
-    </div>
-
-    <!-- عرض الفعاليات -->
-    <div v-else class="grid md:grid-cols-2 gap-6">
-      <div v-for="event in events" :key="event.id"
-           class="bg-white shadow-md rounded-lg border p-6 flex flex-col justify-between hover:shadow-xl transition-all">
-        <div>
-          <h3 class="text-xl font-semibold text-blue-600 mb-2 text-right">{{ event.title }}</h3>
-          <p class="text-gray-600 mb-2 text-right">{{ event.description }}</p>
-          <div class="text-sm text-gray-500 space-y-1 text-right">
-            <p><strong>الموقع:</strong> {{ event.location }}</p>
-            <p><strong>التاريخ:</strong> {{ formatDate(event.start_date) }} - {{ formatDate(event.end_date) }}</p>
-            <p><strong>السعر:</strong> {{ event.price }} ر.س</p>
-            <p><strong>التذاكر المتاحة:</strong> {{ event.available_tickets }}</p>
-          </div>
-        </div>
-
-        <!-- أزرار التحكم تظهر فقط للمستخدم صاحب الفعالية -->
-        <div v-if="currentUserId === event.user_id" class="mt-4 flex justify-between space-x-2 space-x-reverse">
-          <button @click="viewEvent(event)"
-                  class="flex items-center gap-1 bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">
-            عرض
-          </button>
-          <button @click="editEvent(event)"
-                  class="flex items-center gap-1 bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 transition">
-            تعديل
-          </button>
-          <button @click="deleteEvent(event.id)"
-                  class="flex items-center gap-1 bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition">
-            حذف
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- نموذج التعديل (بنفس الصفحة) -->
-    <div v-if="showForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg w-full max-w-md overflow-auto shadow-lg">
-        <div class="p-6">
-          <h2 class="text-xl font-semibold mb-4">تعديل الفعالية</h2>
-          <form @submit.prevent="submitEdit" class="space-y-4">
-            <input type="hidden" v-model="form.id" />
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">اسم الفعالية *</label>
-              <input v-model="form.title" type="text" required class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">الوصف *</label>
-              <textarea v-model="form.description" rows="3" required class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200"></textarea>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">الموقع *</label>
-              <input v-model="form.location" type="text" required class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">تاريخ البداية *</label>
-                <input v-model="form.start_date" type="date" required class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">تاريخ النهاية *</label>
-                <input v-model="form.end_date" type="date" required class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">السعر (ر.س) *</label>
-                <input v-model="form.price" type="number" min="0" step="0.01" required class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">عدد التذاكر *</label>
-                <input v-model="form.available_tickets" type="number" min="1" required class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
-              </div>
-            </div>
-
-            <div class="flex justify-end gap-2 pt-4">
-              <button type="button" @click="closeForm()" class="px-4 py-2 text-gray-600 border rounded-md hover:bg-gray-100">إلغاء</button>
-              <button type="submit" :disabled="saving" class="px-4 py-2 bg-green-600 text-white rounded-md disabled:opacity-50">
-                {{ saving ? 'جاري الحفظ...' : 'تحديث' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
+import { Head } from '@inertiajs/vue3'
+import { ref, computed, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 
-const events = ref([])
+// المتغيرات التفاعلية
 const loading = ref(true)
-const lastError = ref('')
-const showForm = ref(false)
-const saving = ref(false)
+const error = ref('')
+const events = ref([])
+const searchQuery = ref('')
+const filterStatus = ref('all')
 
-// معرف المستخدم الحالي (تحل محل Authorization frontend)
-const currentUserId = ref(null)
+// المعرف الحالي للمستخدم المسجل
+const currentUserId = ref(2) // استبدل هذا بالقيمة الفعلية من props أو page.props.auth.user.id
 
-const form = reactive({
-  id: null,
-  title: '',
-  description: '',
-  location: '',
-  start_date: '',
-  end_date: '',
-  price: 0,
-  available_tickets: 1
+// الدوال المحسوبة
+const filteredEvents = computed(() => {
+  let filtered = events.value
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(event =>
+      event.title?.toLowerCase().includes(query) ||
+      event.location?.toLowerCase().includes(query) ||
+      event.description?.toLowerCase().includes(query)
+    )
+  }
+
+  if (filterStatus.value === 'active') {
+    filtered = filtered.filter(event => new Date(event.start_date) > new Date())
+  } else if (filterStatus.value === 'past') {
+    filtered = filtered.filter(event => new Date(event.start_date) <= new Date())
+  }
+
+  return filtered.sort((a,b) => new Date(b.start_date) - new Date(a.start_date))
 })
 
+// إحصائيات محسوبة
+const activeEventsCount = computed(() => {
+  return events.value.filter(event => new Date(event.start_date) > new Date()).length
+})
+
+const totalTickets = computed(() => {
+  return events.value.reduce((sum, event) => sum + (event.available_tickets || 0), 0)
+})
+
+const totalRevenue = computed(() => {
+  return events.value.reduce((sum, event) => sum + (event.price || 0) * (event.available_tickets || 0), 0)
+})
+
+// الدوال
 const fetchEvents = async () => {
-  loading.value = true
   try {
-    const response = await axios.get('/api/v1/events')
-    events.value = response.data.events
-    // نفترض أن الـ backend يعيد info عن المستخدم الحالي
-    currentUserId.value = response.data.current_user_id || 1
-    lastError.value = ''
-  } catch (error) {
-    lastError.value = 'فشل تحميل الفعاليات: ' + error.message
+    loading.value = true
+    error.value = ''
+
+    const response = await fetch('/api/v1/events')
+    if (!response.ok) throw new Error(`خطأ في الشبكة: ${response.status}`)
+
+    const data = await response.json()
+    events.value = data.events || data || []
+  } catch (err) {
+    error.value = err.message || 'فشل في تحميل الفعاليات'
+    events.value = []
   } finally {
     loading.value = false
   }
 }
 
-const editEvent = (event) => {
-  Object.assign(form, {
-    ...event,
-    start_date: event.start_date ? event.start_date.split('T')[0] : '',
-    end_date: event.end_date ? event.end_date.split('T')[0] : ''
-  })
-  showForm.value = true
-}
-
-const closeForm = () => {
-  showForm.value = false
-  Object.assign(form, { id: null, title: '', description: '', location: '', start_date: '', end_date: '', price: 0, available_tickets: 1 })
-}
-
-const submitEdit = async () => {
-  saving.value = true
-  try {
-    const response = await axios.put(`/api/v1/events/${form.id}`, {
-      title: form.title,
-      description: form.description,
-      location: form.location,
-      start_date: form.start_date,
-      end_date: form.end_date,
-      price: form.price,
-      available_tickets: form.available_tickets
-    })
-    events.value = events.value.map(e => e.id === form.id ? response.data.event : e)
-    alert('تم تحديث الفعالية بنجاح!')
-    closeForm()
-  } catch (error) {
-    console.error('خطأ في الإرسال:', error)
-    lastError.value = error.response?.data?.message || error.message
-    alert('فشل التحديث: ' + lastError.value)
-  } finally {
-    saving.value = false
-  }
-}
+const viewEvent = (event) => router.visit(`/events/${event.id}`)
+const editEvent = (event) => router.visit(`/events/${event.id}/edit`)
 
 const deleteEvent = async (id) => {
-  if (!confirm('هل أنت متأكد من حذف الفعالية؟')) return
+  if (!confirm('هل أنت متأكد من حذف هذه الفعالية؟')) return
   try {
-    await axios.delete(`/api/v1/events/${id}`)
-    events.value = events.value.filter(e => e.id !== id)
-    alert('تم حذف الفعالية بنجاح')
-  } catch (error) {
-    lastError.value = 'فشل الحذف: ' + (error.response?.data?.message || error.message)
-    alert('فشل حذف الفعالية: ' + lastError.value)
+    const response = await fetch(`/api/v1/events/${id}`, {
+      method: 'DELETE',
+      headers: { 'Accept': 'application/json' }
+    })
+    if (response.ok) await fetchEvents()
+    else throw new Error('فشل في الحذف')
+  } catch (err) {
+    alert('❌ فشل في حذف الفعالية')
   }
 }
 
-const formatDate = (dateString) => dateString ? dateString.split('T')[0] : ''
+const formatDate = (dateString) => {
+  if (!dateString) return 'غير محدد'
+  return new Date(dateString).toLocaleDateString('ar-SA', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  })
+}
 
 onMounted(() => fetchEvents())
 </script>
->>>>>>> event-create-form
+
+<style scoped>
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* تحسينات للعرض على الجوال */
+@media (max-width: 640px) {
+  .grid.grid-cols-2 { 
+    grid-template-columns: 1fr; 
+    gap: 0.75rem;
+  }
+}
+
+/* تحسينات للعرض على الأجهزة اللوحية */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .grid.grid-cols-2 { 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+}
+
+/* تحسينات للعرض على الشاشات الكبيرة */
+@media (min-width: 1025px) {
+  .grid.grid-cols-3 { 
+    grid-template-columns: repeat(3, 1fr); 
+  }
+}
+</style>

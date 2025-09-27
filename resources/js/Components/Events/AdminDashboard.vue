@@ -1,198 +1,315 @@
 <template>
   <div :class="darkMode ? 'dark' : ''" class="flex h-screen transition-colors duration-300" dir="rtl">
     <!-- Sidebar Desktop -->
-    <aside class="bg-gray-800 dark:bg-gray-900 text-white w-64 p-4 hidden md:flex flex-col">
-      <h2 class="text-xl font-bold mb-6">إدارة الفعاليات 🎟️</h2>
-      <nav class="flex flex-col gap-4 flex-1">
-        <button @click="navigateTo('/dashboard')" class="flex items-center gap-2 hover:bg-gray-700 p-2 rounded justify-end">
-          لوحة التحكم <span>📊</span>
+    <aside class="bg-gradient-to-b from-blue-800 to-purple-900 text-white w-64 p-4 hidden md:flex flex-col shadow-2xl">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+          <span class="text-2xl">🎪</span>
+        </div>
+        <h2 class="text-xl font-bold">EventHub Pro</h2>
+        <p class="text-blue-200 text-sm">نظام إدارة الفعاليات</p>
+      </div>
+      
+      <nav class="flex flex-col gap-2 flex-1">
+        <button @click="navigateTo('/dashboard')" 
+                :class="activeTab === 'dashboard' ? 'bg-white/20 shadow-lg' : 'hover:bg-white/10'"
+                class="flex items-center gap-3 p-3 rounded-xl transition-all duration-300 group">
+          <span class="text-xl">📊</span>
+          <span class="flex-1 text-right">لوحة التحكم</span>
+          <div class="w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </button>
-        <button @click="navigateTo('/events')" class="flex items-center gap-2 hover:bg-gray-700 p-2 rounded justify-end">
-          الفعاليات <span>🎪</span>
+        
+        <button @click="navigateTo('/events')" 
+                :class="activeTab === 'events' ? 'bg-white/20 shadow-lg' : 'hover:bg-white/10'"
+                class="flex items-center gap-3 p-3 rounded-xl transition-all duration-300 group">
+          <span class="text-xl">🎪</span>
+          <span class="flex-1 text-right">إدارة الفعاليات</span>
+          <div class="w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </button>
-        <button @click="navigateTo('/tickets')" class="flex items-center gap-2 hover:bg-gray-700 p-2 rounded justify-end">
-          التذاكر <span>🎫</span>
+        
+        <button @click="navigateTo('/tickets')" 
+                :class="activeTab === 'tickets' ? 'bg-white/20 shadow-lg' : 'hover:bg-white/10'"
+                class="flex items-center gap-3 p-3 rounded-xl transition-all duration-300 group">
+          <span class="text-xl">🎫</span>
+          <span class="flex-1 text-right">التذاكر والحجوزات</span>
+          <div class="w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </button>
-        <button @click="navigateTo('/users')" class="flex items-center gap-2 hover:bg-gray-700 p-2 rounded justify-end">
-          المستخدمين <span>👥</span>
+        
+        <button @click="navigateTo('/users')" 
+                :class="activeTab === 'users' ? 'bg-white/20 shadow-lg' : 'hover:bg-white/10'"
+                class="flex items-center gap-3 p-3 rounded-xl transition-all duration-300 group">
+          <span class="text-xl">👥</span>
+          <span class="flex-1 text-right">إدارة المستخدمين</span>
+          <div class="w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </button>
+
+        <button @click="navigateTo('/reports')" 
+                :class="activeTab === 'reports' ? 'bg-white/20 shadow-lg' : 'hover:bg-white/10'"
+                class="flex items-center gap-3 p-3 rounded-xl transition-all duration-300 group">
+          <span class="text-xl">📈</span>
+          <span class="flex-1 text-right">التقارير والإحصائيات</span>
+          <div class="w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </button>
       </nav>
-      <button @click="toggleDarkMode" class="mt-auto bg-gray-700 dark:bg-gray-800 hover:bg-gray-600 p-2 rounded flex justify-center">
-        <span>{{ darkMode ? '☀️' : '🌙' }}</span>
-      </button>
+
+      <div class="mt-auto space-y-3">
+        <button @click="toggleDarkMode" 
+                class="w-full bg-white/10 hover:bg-white/20 p-3 rounded-xl flex items-center gap-3 transition-all duration-300">
+          <span class="text-xl">{{ darkMode ? '☀️' : '🌙' }}</span>
+          <span class="flex-1 text-right">{{ darkMode ? 'الوضع النهاري' : 'الوضع الليلي' }}</span>
+        </button>
+        
+        <button @click="logout" 
+                class="w-full bg-red-500/20 hover:bg-red-500/30 text-red-200 p-3 rounded-xl flex items-center gap-3 transition-all duration-300">
+          <span class="text-xl">🚪</span>
+          <span class="flex-1 text-right">تسجيل الخروج</span>
+        </button>
+      </div>
     </aside>
 
-    <!-- Topbar Mobile -->
-    <div class="md:hidden fixed top-0 right-0 w-full flex justify-between items-center bg-gray-800 dark:bg-gray-900 p-3 z-50">
-      <button @click="mobileMenu = !mobileMenu" class="text-white">☰</button>
-      <button @click="toggleDarkMode" class="text-white">
-        {{ darkMode ? '☀️' : '🌙' }}
-      </button>
-    </div>
-
-    <!-- Sidebar Mobile -->
-    <div v-if="mobileMenu" class="md:hidden fixed top-0 right-0 h-full w-20 bg-gray-800 dark:bg-gray-900 text-white p-2 z-40 flex flex-col items-center">
-      <nav class="flex flex-col gap-6 mt-20 flex-1">
-        <button @click="navigateTo('/dashboard')" class="relative group flex flex-col items-center p-2 rounded hover:bg-gray-700 cursor-pointer">
-          <span class="text-2xl">📊</span>
-          <span class="absolute left-full ml-2 bg-black text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">لوحة التحكم</span>
-        </button>
-        <button @click="navigateTo('/events')" class="relative group flex flex-col items-center p-2 rounded hover:bg-gray-700 cursor-pointer">
+    <!-- Mobile Header -->
+    <header class="md:hidden fixed top-0 right-0 w-full bg-gradient-to-r from-blue-800 to-purple-900 text-white p-4 z-50 shadow-lg">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
           <span class="text-2xl">🎪</span>
-          <span class="absolute left-full ml-2 bg-black text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">الفعاليات</span>
+          <div>
+            <h1 class="font-bold">EventHub</h1>
+            <p class="text-blue-200 text-xs">لوحة التحكم</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button @click="toggleDarkMode" class="p-2 rounded-full bg-white/10">
+            {{ darkMode ? '☀️' : '🌙' }}
+          </button>
+          <button @click="mobileMenu = !mobileMenu" class="p-2 rounded-full bg-white/10">
+            ☰
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div v-if="mobileMenu" class="md:hidden fixed top-16 right-0 w-full bg-gradient-to-b from-blue-800 to-purple-900 text-white z-40 shadow-2xl">
+      <nav class="p-4 space-y-2">
+        <button @click="navigateTo('/dashboard')" class="w-full text-right p-3 hover:bg-white/10 rounded-xl transition-colors">
+          📊 لوحة التحكم
         </button>
-        <button @click="navigateTo('/tickets')" class="relative group flex flex-col items-center p-2 rounded hover:bg-gray-700 cursor-pointer">
-          <span class="text-2xl">🎫</span>
-          <span class="absolute left-full ml-2 bg-black text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">التذاكر</span>
+        <button @click="navigateTo('/events')" class="w-full text-right p-3 hover:bg-white/10 rounded-xl transition-colors">
+          🎪 إدارة الفعاليات
         </button>
-        <button @click="navigateTo('/users')" class="relative group flex flex-col items-center p-2 rounded hover:bg-gray-700 cursor-pointer">
-          <span class="text-2xl">👥</span>
-          <span class="absolute left-full ml-2 bg-black text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">المستخدمين</span>
+        <button @click="navigateTo('/tickets')" class="w-full text-right p-3 hover:bg-white/10 rounded-xl transition-colors">
+          🎫 التذاكر والحجوزات
+        </button>
+        <button @click="navigateTo('/users')" class="w-full text-right p-3 hover:bg-white/10 rounded-xl transition-colors">
+          👥 إدارة المستخدمين
+        </button>
+        <button @click="navigateTo('/reports')" class="w-full text-right p-3 hover:bg-white/10 rounded-xl transition-colors">
+          📈 التقارير والإحصائيات
+        </button>
+        <button @click="logout" class="w-full text-right p-3 hover:bg-red-500/20 text-red-200 rounded-xl transition-colors">
+          🚪 تسجيل الخروج
         </button>
       </nav>
-      <button @click="toggleDarkMode" class="p-2 rounded hover:bg-gray-700 flex justify-center mt-auto">
-        <span>{{ darkMode ? '☀️' : '🌙' }}</span>
-      </button>
     </div>
 
     <!-- Main Content -->
-    <main class="flex-1 p-6 overflow-auto bg-gray-100 dark:bg-gray-800 transition-colors duration-300 mt-12 md:mt-0">
+    <main class="flex-1 p-6 overflow-auto bg-gradient-to-br from-blue-50 to-purple-100 dark:from-gray-900 dark:to-blue-900 transition-colors duration-300 mt-16 md:mt-0">
       
-      <!-- Loading State -->
-      <div v-if="loading" class="flex justify-center items-center h-64">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <!-- Welcome Header -->
+      <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 mb-6 shadow-lg">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+              مرحباً بك، {{ user.name }}! 👋
+            </h1>
+            <p class="text-gray-600 dark:text-gray-300">
+              {{ getGreeting() }} - لديك {{ stats.upcomingEvents }} فعالية قادمة هذا الأسبوع
+            </p>
+          </div>
+          <div class="flex items-center gap-3 mt-4 md:mt-0">
+            <div class="text-right">
+              <p class="text-sm text-gray-500 dark:text-gray-400">الدور: {{ user.role }}</p>
+              <p class="text-xs text-gray-400 dark:text-gray-500">آخر دخول: {{ user.last_login }}</p>
+            </div>
+            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+              {{ getUserInitials() }}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Content when not loading -->
-      <div v-else>
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 text-right">
-          <div class="stat-card bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md text-center">
-            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ stats.totalEvents }}</div>
-            <div class="text-gray-600 dark:text-gray-300">إجمالي الفعاليات</div>
+      <!-- Stats Overview -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border-l-4 border-blue-500">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-gray-500 dark:text-gray-400 text-sm">إجمالي الفعاليات</p>
+              <h3 class="text-1xl font-bold text-gray-800 dark:text-white">{{ stats.totalEvents }}</h3>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
+              <span class="text-2xl text-blue-600 dark:text-blue-400">🎪</span>
+            </div>
           </div>
-          <div class="stat-card bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md text-center">
-            <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ stats.activeEvents }}</div>
-            <div class="text-gray-600 dark:text-gray-300">فعاليات نشطة</div>
-          </div>
-          <div class="stat-card bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md text-center">
-            <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ stats.averagePrice }} ر.س</div>
-            <div class="text-gray-600 dark:text-gray-300">متوسط الأسعار</div>
-          </div>
+          <p class="text-green-500 text-sm mt-2">↑ 12% عن الشهر الماضي</p>
         </div>
 
-        <!-- Quick Actions Section -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <!-- رفع الصور -->
-          <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white text-right">رفع صورة فعالية</h3>
-            <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
-              <input type="file" @change="handleImageUpload" accept="image/*" class="hidden" id="imageUpload">
-              <label for="imageUpload" class="cursor-pointer block">
-                <span class="text-4xl">📁</span>
-                <p class="mt-2 text-gray-600 dark:text-gray-400">اسحب وأفلت الصورة أو انقر للاختيار</p>
-              </label>
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border-l-4 border-green-500">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-gray-500 dark:text-gray-400 text-sm">التذاكر المباعة</p>
+              <h3 class="text-1xl font-bold text-gray-800 dark:text-white">{{ stats.totalTickets }}</h3>
             </div>
-            <div v-if="uploadedImage" class="mt-4">
-              <img :src="uploadedImage" class="w-32 h-32 object-cover rounded-lg mx-auto">
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center">
+              <span class="text-2xl text-green-600 dark:text-green-400">🎫</span>
             </div>
           </div>
+          <p class="text-green-500 text-sm mt-2">↑ 8% عن الأسبوع الماضي</p>
+        </div>
 
-          <!-- إضافة فعالية سريعة -->
-          <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white text-right">إضافة فعالية سريعة</h3>
-            <form @submit.prevent="addQuickEvent" class="space-y-3">
-              <input v-model="quickEvent.title" type="text" placeholder="اسم الفعالية" 
-                     class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-600 dark:text-white">
-              <input v-model="quickEvent.date" type="date" 
-                     class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-600 dark:text-white">
-              <button type="submit" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 transition-colors">
-                إضافة سريعة
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border-l-4 border-purple-500">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-gray-500 dark:text-gray-400 text-sm">إجمالي الإيرادات</p>
+              <h3 class="text-1xl font-bold text-gray-800 dark:text-white">{{ formatCurrency(stats.totalRevenue) }}</h3>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center">
+              <span class="text-2xl text-purple-600 dark:text-purple-400">💵</span>
+            </div>
+          </div>
+          <p class="text-green-500 text-sm mt-2">↑ 15% عن الشهر الماضي</p>
+        </div>
+
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border-l-4 border-orange-500">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-gray-500 dark:text-gray-400 text-sm">معدل الإشغال</p>
+              <h3 class="text-1xl font-bold text-gray-800 dark:text-white">{{ stats.occupancyRate }}%</h3>
+            </div>
+            <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center">
+              <span class="text-2xl text-orange-600 dark:text-orange-400">📊</span>
+            </div>
+          </div>
+          <p class="text-green-500 text-sm mt-2">↑ 5% عن الأسبوع الماضي</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions & Charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Quick Actions -->
+        <div class="lg:col-span-1 space-y-4">
+          <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">إجراءات سريعة ⚡</h3>
+            <div class="space-y-3">
+              <button @click="navigateTo('/events/create')" 
+                      class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-xl flex items-center gap-3 hover:from-blue-600 hover:to-purple-700 transition-all duration-300">
+                <span>➕</span>
+                <span>إضافة فعالية جديدة</span>
               </button>
-            </form>
-          </div>
-        </div>
-
-        <!-- Search and Filter Section -->
-        <div class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md mb-6">
-          <div class="flex flex-col md:flex-row gap-4 items-center">
-            <!-- بحث -->
-            <div class="flex-1">
-              <input v-model="searchQuery" type="text" placeholder="ابحث في الفعاليات..." 
-                     class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-600 dark:text-white">
+              <button @click="navigateTo('/tickets/create')" 
+                      class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white p-3 rounded-xl flex items-center gap-3 hover:from-green-600 hover:to-teal-700 transition-all duration-300">
+                <span>🎫</span>
+                <span>إنشاء تذاكر جديدة</span>
+              </button>
+              <button @click="navigateTo('/reports')" 
+                      class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white p-3 rounded-xl flex items-center gap-3 hover:from-purple-600 hover:to-pink-700 transition-all duration-300">
+                <span>📈</span>
+                <span>عرض التقارير</span>
+              </button>
             </div>
-            
-            <!-- تصفية -->
-            <select v-model="filterStatus" class="p-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-600 dark:text-white">
-              <option value="all">جميع الفعاليات</option>
-              <option value="active">فعاليات قادمة</option>
-              <option value="past">فعاليات منتهية</option>
-            </select>
-            
-            <!-- ترتيب -->
-            <select v-model="sortBy" class="p-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-600 dark:text-white">
-              <option value="newest">الأحدث أولاً</option>
-              <option value="oldest">الأقدم أولاً</option>
-              <option value="price-high">الأعلى سعراً</option>
-              <option value="price-low">الأقل سعراً</option>
-            </select>
+          </div>
+
+          <!-- File Upload -->
+          <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">رفع ملفات 📁</h3>
+            <div @click="triggerFileUpload" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center cursor-pointer hover:border-blue-500 transition-colors">
+              <span class="text-4xl">📁</span>
+              <p class="mt-2 text-gray-600 dark:text-gray-400">انقر لرفع صورة أو ملف</p>
+              <input type="file" ref="fileInput" @change="handleFileUpload" class="hidden" accept="image/*,.pdf,.doc,.docx">
+            </div>
           </div>
         </div>
 
-        <!-- Pie Chart -->
-        <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md mb-6">
-          <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white text-right">توزيع الفعاليات</h3>
-          <div class="w-full h-96">
-            <canvas id="eventsChart" class="w-full h-full"></canvas>
+        <!-- Charts Section -->
+        <div class="lg:col-span-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-6">الإحصائيات والرسوم البيانية 📊</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+              <h4 class="font-medium text-gray-800 dark:text-white mb-3">توزيع الفعاليات</h4>
+              <div class="h-48">
+                <canvas ref="eventsChart"></canvas>
+              </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+              <h4 class="font-medium text-gray-800 dark:text-white mb-3">الإيرادات الشهرية</h4>
+              <div class="h-48">
+                <canvas ref="revenueChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity & Upcoming Events -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Recent Activity -->
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">النشاط الأخير 🔔</h3>
+            <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full">
+              {{ recentActivities.length }} نشاط
+            </span>
+          </div>
+          <div class="space-y-3">
+            <div v-for="activity in recentActivities" :key="activity.id" 
+                 class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <span class="text-2xl">{{ activity.icon }}</span>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-gray-800 dark:text-white">{{ activity.message }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ activity.time }}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Recent Events Table -->
-        <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
-          <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white text-right">أحدث الفعاليات</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-right">
-              <thead>
-                <tr class="bg-gray-50 dark:bg-gray-600">
-                  <th class="px-4 py-3 text-gray-600 dark:text-gray-300">اسم الفعالية</th>
-                  <th class="px-4 py-3 text-gray-600 dark:text-gray-300">التاريخ</th>
-                  <th class="px-4 py-3 text-gray-600 dark:text-gray-300">المكان</th>
-                  <th class="px-4 py-3 text-gray-600 dark:text-gray-300">السعر</th>
-                  <th class="px-4 py-3 text-gray-600 dark:text-gray-300">الحالة</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="event in filteredEvents" :key="event.id" class="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                  <td class="px-4 py-3 text-gray-800 dark:text-gray-200">{{ event.title }}</td>
-                  <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ formatDate(event.start_date) }}</td>
-                  <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ event.location }}</td>
-                  <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ event.price }} ر.س</td>
-                  <td class="px-4 py-3">
-                    <span :class="`px-2 py-1 rounded-full text-xs ${
-                      new Date(event.start_date) > new Date() 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' 
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-300'
-                    }`">
-                      {{ new Date(event.start_date) > new Date() ? 'قادمة' : 'منتهية' }}
-                    </span>
-                  </td>
-                </tr>
-                <tr v-if="filteredEvents.length === 0">
-                  <td colspan="5" class="px-4 py-3 text-center text-gray-600 dark:text-gray-400">
-                    لا توجد فعاليات لعرضها
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <!-- Upcoming Events -->
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">الفعاليات القادمة 🗓️</h3>
+            <button @click="navigateTo('/events')" 
+                    class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium">
+              عرض الكل
+            </button>
+          </div>
+          <div class="space-y-3">
+            <div v-for="event in upcomingEvents" :key="event.id" 
+                 @click="navigateTo('/events/' + event.id)"
+                 class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors">
+              <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <span class="text-white text-lg">🎪</span>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-gray-800 dark:text-white">{{ event.title }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ formatDate(event.start_date) }} • {{ event.location }}
+                </p>
+              </div>
+              <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs px-2 py-1 rounded-full">
+                {{ event.tickets_sold }}/{{ event.total_tickets }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
     </main>
+
+    <!-- File Input (hidden) -->
+    <input type="file" ref="fileInput" @change="handleFileUpload" class="hidden">
   </div>
 </template>
 
 <script>
-import { ref, onMounted, nextTick, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 export default {
   name: 'Dashboard',
@@ -200,75 +317,58 @@ export default {
     // Refs
     const darkMode = ref(false)
     const mobileMenu = ref(false)
-    const loading = ref(true)
-    const stats = ref({ 
-      totalEvents: 0, 
-      activeEvents: 0, 
-      averagePrice: 0 
+    const activeTab = ref('dashboard')
+    const fileInput = ref(null)
+    
+    // User Data
+    const user = ref({
+      name: 'أحمد محمد',
+      role: 'مدير النظام',
+      last_login: 'قبل ساعتين',
+      email: 'ahmed@example.com'
     })
-    const recentEvents = ref([])
-    const chartInstance = ref(null)
-    const uploadedImage = ref(null)
-    const quickEvent = ref({
-      title: '',
-      date: ''
+
+    // Statistics
+    const stats = ref({
+      totalEvents: 24,
+      totalTickets: 1560,
+      totalRevenue: 125400,
+      occupancyRate: 78,
+      upcomingEvents: 3
     })
-    const searchQuery = ref('')
-    const filterStatus = ref('all')
-    const sortBy = ref('newest')
+
+    // Sample Data
+    const recentActivities = ref([
+      { id: 1, icon: '🎫', message: 'تم بيع 5 تذاكر لفعالية الحفل الموسيقي', time: 'قبل 5 دقائق' },
+      { id: 2, icon: '➕', message: 'تم إضافة فعالية جديدة: معرض الفنون', time: 'قبل ساعة' },
+      { id: 3, icon: '👥', message: 'مستخدم جديد انضم إلى النظام', time: 'قبل ساعتين' },
+      { id: 4, icon: '📧', message: 'تم إرسال إشعارات للفعالية القادمة', time: 'قبل 3 ساعات' }
+    ])
+
+    const upcomingEvents = ref([
+      { id: 1, title: 'حفل موسيقي راقي', start_date: '2024-02-15', location: 'قاعة المؤتمرات', tickets_sold: 45, total_tickets: 100 },
+      { id: 2, title: 'ندوة التكنولوجيا', start_date: '2024-02-18', location: 'المركز الثقافي', tickets_sold: 78, total_tickets: 150 },
+      { id: 3, title: 'معرض الفنون', start_date: '2024-02-20', location: 'صالة المعارض', tickets_sold: 23, total_tickets: 80 }
+    ])
 
     // Computed
-    const filteredEvents = computed(() => {
-      try {
-        let events = recentEvents.value.filter(event => {
-          if (!event) return false
-          const title = event.title ? event.title.toLowerCase() : ''
-          const location = event.location ? event.location.toLowerCase() : ''
-          const query = searchQuery.value.toLowerCase()
-          return title.includes(query) || location.includes(query)
-        })
-
-        // التصفية حسب الحالة
-        if (filterStatus.value === 'active') {
-          events = events.filter(event => new Date(event.start_date) > new Date())
-        } else if (filterStatus.value === 'past') {
-          events = events.filter(event => new Date(event.start_date) <= new Date())
-        }
-
-        // الترتيب
-        switch (sortBy.value) {
-          case 'newest':
-            events.sort((a, b) => new Date(b.start_date) - new Date(a.start_date))
-            break
-          case 'oldest':
-            events.sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
-            break
-          case 'price-high':
-            events.sort((a, b) => (b.price || 0) - (a.price || 0))
-            break
-          case 'price-low':
-            events.sort((a, b) => (a.price || 0) - (b.price || 0))
-            break
-        }
-
-        return events
-      } catch (error) {
-        console.error('Error filtering events:', error)
-        return []
-      }
+    const greeting = computed(() => {
+      const hour = new Date().getHours()
+      if (hour < 12) return 'صباح الخير'
+      if (hour < 18) return 'مساء الخير'
+      return 'مساء الخير'
     })
 
     // Methods
     const navigateTo = (path) => {
-      try {
-        if (window.router) {
-          window.router.visit(path)
-        } else {
-          window.location.href = path
-        }
-        mobileMenu.value = false
-      } catch (error) {
-        console.error('Navigation error:', error)
+      activeTab.value = path.split('/')[1] || 'dashboard'
+      mobileMenu.value = false
+      
+      // استخدام Inertia.js للتنقل إذا كان متاحاً
+      if (window.Inertia) {
+        window.Inertia.visit(path)
+      } else {
+        // التنقل العادي كحل بديل
         window.location.href = path
       }
     }
@@ -276,206 +376,109 @@ export default {
     const toggleDarkMode = () => {
       darkMode.value = !darkMode.value
       localStorage.setItem('darkMode', darkMode.value)
-      if (chartInstance.value) {
-        renderChart(recentEvents.value)
-      }
     }
 
-    const handleImageUpload = (event) => {
-      try {
-        const file = event.target.files[0]
-        if (file && file.type.startsWith('image/')) {
-          const reader = new FileReader()
-          reader.onload = (e) => {
-            uploadedImage.value = e.target.result
-            showToast('نجاح', 'تم رفع الصورة بنجاح!', 'success')
-          }
-          reader.onerror = () => {
-            showToast('خطأ', 'فشل في قراءة الصورة', 'error')
-          }
-          reader.readAsDataURL(file)
-        } else {
-          showToast('خطأ', 'يرجى اختيار صورة صالحة', 'error')
-        }
-      } catch (error) {
-        console.error('Image upload error:', error)
-        showToast('خطأ', 'فشل في رفع الصورة', 'error')
-      }
+    const triggerFileUpload = () => {
+      fileInput.value.click()
     }
 
-    const addQuickEvent = async () => {
-      try {
-        if (!quickEvent.value.title || !quickEvent.value.date) {
-          showToast('خطأ', 'يرجى ملء جميع الحقول', 'error')
-          return
-        }
-
-        // محاكاة API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        showToast('نجاح', 'تم إضافة الفعالية بنجاح!', 'success')
-        quickEvent.value = { title: '', date: '' }
-        
-        // إعادة تحميل البيانات
-        await fetchStats()
-      } catch (error) {
-        console.error('Error adding event:', error)
-        showToast('خطأ', 'فشل في إضافة الفعالية', 'error')
-      }
-    }
-
-    const fetchStats = async () => {
-      try {
-        loading.value = true
-        
-        // محاكاة API call مع بيانات تجريبية
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // بيانات تجريبية للاختبار
-        const mockEvents = [
-          {
-            id: 1,
-            title: 'حفل موسيقي',
-            start_date: '2024-02-15',
-            location: 'الرياض',
-            price: 150,
-            available_tickets: 100
-          },
-          {
-            id: 2,
-            title: 'ندوة تقنية',
-            start_date: '2024-01-10',
-            location: 'جدة',
-            price: 200,
-            available_tickets: 50
-          },
-          {
-            id: 3,
-            title: 'معرض فني',
-            start_date: '2024-03-20',
-            location: 'الدمام',
-            price: 75,
-            available_tickets: 200
-          }
-        ]
-
-        const events = mockEvents
-
-        // الإحصائيات
-        stats.value.totalEvents = events.length
-        stats.value.activeEvents = events.filter(e => new Date(e.start_date) > new Date()).length
-        stats.value.averagePrice = events.length > 0 
-          ? Math.round(events.reduce((sum, e) => sum + (e.price || 0), 0) / events.length) 
-          : 0
-
-        // أحدث الفعاليات
-        recentEvents.value = events
-
-        await nextTick()
-        renderChart(events)
-      } catch (error) {
-        console.error('Error fetching stats:', error)
-        showToast('خطأ', 'فشل في تحميل البيانات', 'error')
-      } finally {
-        loading.value = false
-      }
-    }
-
-    const renderChart = (events) => {
-      try {
-        const ctx = document.getElementById('eventsChart')
-        if (!ctx) {
-          console.warn('Chart canvas not found')
-          return
-        }
-
-        if (chartInstance.value) {
-          chartInstance.value.destroy()
-        }
-
-        // استخدم Chart.js إذا كان متاحاً، وإلا لا تعرض المخطط
-        if (typeof Chart === 'undefined') {
-          console.warn('Chart.js not loaded')
-          return
-        }
-
-        const eventTitles = events.map(e => e.title.substring(0, 15) + (e.title.length > 15 ? '...' : ''))
-        const ticketCounts = events.map(e => e.available_tickets || 1)
-
-        chartInstance.value = new Chart(ctx, {
-          type: 'pie',
-          data: {
-            labels: eventTitles,
-            datasets: [{
-              data: ticketCounts,
-              backgroundColor: ['#3B82F6', '#10B981', '#EF4444', '#F59E0B'],
-              borderWidth: 2,
-              borderColor: darkMode.value ? '#1F2937' : '#FFFFFF'
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'bottom',
-                labels: {
-                  color: darkMode.value ? '#F9FAFB' : '#374151',
-                  font: { size: 12 }
-                }
-              }
-            }
-          }
+    const handleFileUpload = (event) => {
+      const file = event.target.files[0]
+      if (file) {
+        // هنا يمكنك إضافة رفع الملف إلى الخادم
+        console.log('File selected:', file.name)
+        // إضافة نشاط جديد
+        recentActivities.value.unshift({
+          id: Date.now(),
+          icon: '📁',
+          message: `تم رفع الملف: ${file.name}`,
+          time: 'الآن'
         })
-      } catch (error) {
-        console.error('Chart rendering error:', error)
       }
+    }
+
+    const logout = () => {
+      if (confirm('هل تريد تسجيل الخروج؟')) {
+        // تسجيل الخروج عبر Laravel
+        fetch('/logout', { method: 'POST' })
+          .then(() => window.location.href = '/')
+          .catch(() => window.location.href = '/')
+      }
+    }
+
+    const getGreeting = () => {
+      const hour = new Date().getHours()
+      if (hour < 12) return 'صباح الخير! 🌅'
+      if (hour < 18) return 'مساء الخير! ☀️'
+      return 'مساء الخير! 🌙'
+    }
+
+    const getUserInitials = () => {
+      return user.value.name.split(' ').map(n => n[0]).join('').toUpperCase()
+    }
+
+    const formatCurrency = (amount) => {
+      return new Intl.NumberFormat('ar-SA', {
+        style: 'currency',
+        currency: 'SAR'
+      }).format(amount)
     }
 
     const formatDate = (dateString) => {
-      try {
-        return new Date(dateString).toLocaleDateString('ar-SA', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })
-      } catch (error) {
-        return dateString
-      }
+      return new Date(dateString).toLocaleDateString('ar-SA', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
     }
 
-    const showToast = (title, message, type) => {
-      // تنفيذ بسيط للإشعارات
-      console.log(`${type}: ${title} - ${message}`)
+    // Initialize Charts
+    const initializeCharts = () => {
+      // سوف نضيف الرسوم البيانية هنا لاحقاً
+      console.log('Charts initialized')
+    }
+
+    // Fetch Data from API
+    const fetchDashboardData = async () => {
+      try {
+        const response = await fetch('/api/v1/dashboard')
+        if (response.ok) {
+          const data = await response.json()
+          // تحديث البيانات من الخادم
+          stats.value = data.stats
+          upcomingEvents.value = data.upcomingEvents
+          recentActivities.value = data.recentActivities
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error)
+      }
     }
 
     // Lifecycle
     onMounted(() => {
-      try {
-        darkMode.value = localStorage.getItem('darkMode') === 'true'
-        fetchStats()
-      } catch (error) {
-        console.error('Mount error:', error)
-        loading.value = false
-      }
+      darkMode.value = localStorage.getItem('darkMode') === 'true'
+      fetchDashboardData()
+      initializeCharts()
     })
 
     return {
       darkMode,
       mobileMenu,
-      loading,
+      activeTab,
+      user,
       stats,
-      recentEvents,
-      uploadedImage,
-      quickEvent,
-      searchQuery,
-      filterStatus,
-      sortBy,
-      filteredEvents,
+      recentActivities,
+      upcomingEvents,
+      fileInput,
       navigateTo,
       toggleDarkMode,
-      handleImageUpload,
-      addQuickEvent,
+      triggerFileUpload,
+      handleFileUpload,
+      logout,
+      getGreeting,
+      getUserInitials,
+      formatCurrency,
       formatDate
     }
   }
@@ -483,38 +486,66 @@ export default {
 </script>
 
 <style scoped>
-.stat-card { 
-  transition: transform 0.2s ease, box-shadow 0.2s ease; 
-}
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+/* تحسينات التصميم */
+.backdrop-blur-sm {
+  backdrop-filter: blur(8px);
 }
 
-.dark .stat-card:hover {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+/* تأثيرات الظلال */
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 /* تحسينات للوضع الداكن */
-.dark .bg-white {
-  background-color: #1F2937;
+.dark .backdrop-blur-sm {
+  background-color: rgba(17, 24, 39, 0.8);
 }
-.dark .text-gray-800 {
-  color: #F9FAFB;
-}
-.dark .text-gray-600 {
-  color: #D1D5DB;
+
+/* تأثيرات hover محسنة */
+.transition-all {
+  transition: all 0.3s ease;
 }
 
 /* تحسينات للاستجابة */
 @media (max-width: 768px) {
-  .grid.grid-cols-1.md\:grid-cols-2 {
+  .grid.grid-cols-1.lg\:grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid.grid-cols-1.lg\:grid-cols-2 {
     grid-template-columns: 1fr;
   }
 }
 
-/* تحسينات عامة */
-.transition-colors {
-  transition: background-color 0.3s ease, color 0.3s ease;
+/* تحسينات النص للغة العربية */
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* تحسينات الشريط الجانبي */
+.bg-gradient-to-b {
+  background: linear-gradient(to bottom, var(--tw-gradient-stops));
+}
+
+/* تأثيرات بصرية إضافية */
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+/* تحسينات للشعارات */
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+/* تحسينات للأزرار */
+button {
+  border: none;
+  outline: none;
+}
+
+button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 </style>

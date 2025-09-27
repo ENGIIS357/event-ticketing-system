@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* محاذاة عامة للغة العربية */
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* تحسينات للمدخلات في الوضع العربي */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+}
+
+/* تحسينات للأزرار في الوضع العربي */
+[dir="rtl"] .flex-row {
+  direction: rtl;
+}
+
+/* تحسينات للقوائم في الوضع العربي */
+[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+/* تحسينات للشبكات في الوضع العربي */
+[dir="rtl"] .grid {
+  direction: rtl;
+}

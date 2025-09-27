@@ -1,147 +1,166 @@
 <template>
-  <div class="container mx-auto px-4 py-8" dir="rtl">
-    <h1 class="text-2xl font-bold mb-6">إضافة فعالية جديدة</h1>
+  <Head title="إضافة فعالية جديدة" />
 
-    <form @submit.prevent="submitEvent" class="space-y-4 max-w-lg bg-white p-6 rounded-lg shadow-md">
-      <!-- اسم الفعالية -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700">اسم الفعالية *</label>
-        <input v-model="form.title" type="text" required
-               class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
-      </div>
-
-      <!-- الوصف -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700">الوصف *</label>
-        <textarea v-model="form.description" rows="3" required
-                  class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200"></textarea>
-      </div>
-
-      <!-- الموقع -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700">الموقع *</label>
-        <input v-model="form.location" type="text" required
-               class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
-      </div>
-
-      <!-- التواريخ -->
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700">تاريخ البداية *</label>
-          <input v-model="form.start_date" type="date" required
-                 class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
+  <AuthenticatedLayout>
+    <template #header>
+      <div class="flex justify-between items-center">
+        <div class="text-right">
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-white">إضافة فعالية جديدة</h2>
+          <p class="text-gray-600 dark:text-gray-300 mt-1">املأ البيانات لإنشاء فعالية جديدة</p>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">تاريخ النهاية *</label>
-          <input v-model="form.end_date" type="date" required
-                 class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
-        </div>
-      </div>
-
-      <!-- السعر وعدد التذاكر -->
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700">السعر (ر.س) *</label>
-          <input v-model.number="form.price" type="number" min="0" step="0.01" required
-                 class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">عدد التذاكر *</label>
-          <input v-model.number="form.available_tickets" type="number" min="1" required
-                 class="w-full px-3 py-2 border rounded-md mt-1 focus:ring focus:ring-green-200">
-        </div>
-      </div>
-
-      <!-- أزرار الإرسال -->
-      <div class="flex justify-end gap-2 pt-4">
-        <button type="button" @click="router.visit('/events')"
-                class="px-4 py-2 text-gray-600 border rounded-md hover:bg-gray-100">
-          إلغاء
-        </button>
-        <button type="submit" :disabled="saving"
-                class="px-4 py-2 bg-green-600 text-white rounded-md disabled:opacity-50">
-          {{ saving ? 'جاري الحفظ...' : 'حفظ' }}
+        <button @click="$inertia.visit('/events')" 
+                class="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+          رجوع للقائمة ←
         </button>
       </div>
-    </form>
-  </div>
+    </template>
+
+    <div class="py-6">
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div class="bg-gradient-to-r from-green-500 to-green-600 h-1 w-full"></div>
+          <div class="p-8">
+            <form @submit.prevent="submitEvent" class="space-y-6">
+              <div class="grid md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 text-right">
+                    اسم الفعالية *
+                  </label>
+                  <input v-model="form.title" type="text" required 
+                         placeholder="أدخل اسم الفعالية..."
+                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                focus:ring-2 focus:ring-green-500 focus:border-transparent
+                                dark:bg-gray-700 dark:text-white transition-all text-right"
+                         dir="rtl">
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 text-right">
+                    الوصف *
+                  </label>
+                  <textarea v-model="form.description" rows="4" required
+                            placeholder="وصف مختصر للفعالية..."
+                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                   focus:ring-2 focus:ring-green-500 focus:border-transparent
+                                   dark:bg-gray-700 dark:text-white transition-all text-right"
+                            dir="rtl"></textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 text-right">
+                    الموقع *
+                  </label>
+                  <input v-model="form.location" type="text" required
+                         placeholder="موقع انعقاد الفعالية..."
+                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                focus:ring-2 focus:ring-green-500 focus:border-transparent
+                                dark:bg-gray-700 dark:text-white transition-all text-right"
+                         dir="rtl">
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-2 gap-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <div class="text-right">
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    تاريخ البداية *
+                  </label>
+                  <input v-model="form.start_date" type="date" required
+                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                focus:ring-2 focus:ring-green-500 focus:border-transparent
+                                dark:bg-gray-700 dark:text-white transition-all text-center"
+                         dir="rtl">
+                </div>
+
+                <div class="text-right">
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    تاريخ النهاية *
+                  </label>
+                  <input v-model="form.end_date" type="date" required
+                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                focus:ring-2 focus:ring-green-500 focus:border-transparent
+                                dark:bg-gray-700 dark:text-white transition-all text-center"
+                         dir="rtl">
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-2 gap-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <div class="text-right">
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    السعر (ر.س) *
+                  </label>
+                  <div class="relative">
+                    <span class="absolute left-3 top-3 text-gray-500">ر.س</span>
+                    <input v-model.number="form.price" type="number" min="0" step="0.01" required
+                           class="w-full px-4 py-3 pl-12 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                  focus:ring-2 focus:ring-green-500 focus:border-transparent
+                                  dark:bg-gray-700 dark:text-white transition-all text-right"
+                           dir="rtl">
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    عدد التذاكر *
+                  </label>
+                  <input v-model.number="form.available_tickets" type="number" min="1" required
+                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                focus:ring-2 focus:ring-green-500 focus:border-transparent
+                                dark:bg-gray-700 dark:text-white transition-all text-right"
+                         dir="rtl">
+                </div>
+              </div>
+
+              <div class="flex justify-start gap-3 pt-6 border-t border-gray-200 dark:border-gray-600">
+                <button type="submit" :disabled="saving"
+                        class="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg
+                               hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed
+                               transition-all flex items-center gap-2 order-2">
+                  <span v-if="saving" class="animate-spin">⟳</span>
+                  {{ saving ? 'جاري الحفظ...' : 'إنشاء الفعالية' }}
+                </button>
+                <button type="button" @click="$inertia.visit('/events')"
+                        class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 
+                               rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors order-1">
+                  إلغاء
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </AuthenticatedLayout>
 </template>
 
-<script setup>
-import { reactive, ref } from 'vue'
-import { router } from '@inertiajs/vue3'
-import axios from 'axios'
+<script>
+import { Inertia } from '@inertiajs/inertia'
 
-const saving = ref(false)
-
-const form = reactive({
-  title: '',
-  description: '',
-  location: '',
-  start_date: '',
-  end_date: '',
-  price: 0,
-  available_tickets: 1
-})
-
-const submitEvent = async () => {
-  saving.value = true
-
-  // --- Validation محلي ---
-  if (!form.title || !form.description || !form.location) {
-    alert('❌ يرجى ملء جميع الحقول النصية')
-    saving.value = false
-    return
-  }
-
-  if (!form.start_date || !form.end_date) {
-    alert('❌ يرجى تحديد التواريخ')
-    saving.value = false
-    return
-  }
-
-  if (new Date(form.end_date) < new Date(form.start_date)) {
-    alert('❌ تاريخ النهاية يجب أن يكون بعد تاريخ البداية')
-    saving.value = false
-    return
-  }
-
-  if (form.price < 0 || form.available_tickets < 1) {
-    alert('❌ تأكد من أن السعر وعدد التذاكر صحيح')
-    saving.value = false
-    return
-  }
-
-  try {
-    // --- إرسال البيانات ---
-    const payload = {
-      title: form.title.trim(),
-      description: form.description.trim(),
-      location: form.location.trim(),
-      start_date: form.start_date,
-      end_date: form.end_date,
-      price: parseFloat(form.price),
-      available_tickets: parseInt(form.available_tickets),
+export default {
+  data() {
+    return {
+      form: {
+        title: '',
+        description: '',
+        location: '',
+        start_date: '',
+        end_date: '',
+        price: 0,
+        available_tickets: 1,
+      },
+      saving: false,
     }
-
-    console.log('🚀 إرسال البيانات:', payload)
-
-    await axios.post('/api/v1/events', payload, {
-      headers: { 'Accept': 'application/json' }
-    })
-
-    alert('✅ تم إضافة الفعالية بنجاح!')
-    router.visit('/events')
-  } catch (error) {
-    console.error('خطأ في الإرسال:', error)
-    if (error.response?.data?.errors) {
-      const messages = Object.values(error.response.data.errors).flat().join(', ')
-      alert('❌ فشل إضافة الفعالية: ' + messages)
-    } else {
-      alert('❌ فشل إضافة الفعالية')
+  },
+  methods: {
+    submitEvent() {
+      this.saving = true
+      Inertia.post('/events', this.form)
+        .then(() => {
+          this.saving = false
+        })
+        .catch(() => {
+          this.saving = false
+        })
     }
-  } finally {
-    saving.value = false
   }
 }
 </script>
