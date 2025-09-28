@@ -6,6 +6,9 @@ use Illuminate\Foundation\Application;
 //use App\Http\Controllers\EventController; // 👈 مو Api\EventController
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\UserController;
+//use App\Http\Controllers\TicketController;
+//use App\Http\Controllers\Api\V1\TicketController;
 
 /*
 |--------------------------------------------------------------------------
@@ -150,3 +153,41 @@ Route::get('/v1/events-json/{event}', [EventController::class, 'apiShow']);
 // Route::get('/dashboard', function () {
 //     return Inertia::render('Dashboard');
 // })->name('dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+
+    Route::resource('users', UserController::class);
+    Route::resource('tickets', TicketController::class);
+    
+    Route::get('/events', function () {
+        return Inertia::render('Events/Index');
+    })->name('events.index');
+    
+    Route::get('/reports', function () {
+        return Inertia::render('Reports/Index');
+    })->name('reports');
+});
+Route::get('/tickets', function () {
+    return Inertia::render('Tickets/Index');
+})->name('tickets.index');
+Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
+    Route::get('/tickets', [TicketController::class, 'index']);
+});
+// Route::middleware(['auth:sanctum'])->group(function () {
+//     Route::get('/tickets', [TicketController::class, 'index']);
+//     Route::get('/tickets/stats', [TicketController::class, 'stats']);
+//     Route::get('/tickets/{ticket}', [TicketController::class, 'show']);
+//     Route::put('/tickets/{ticket}', [TicketController::class, 'update']);
+//     Route::delete('/tickets/{ticket}', [TicketController::class, 'destroy']);
+//     Route::post('/tickets/export', [TicketController::class, 'export']);
+// });
+//  Route::prefix('notifications')->group(function () {
+//         Route::get('/', [NotificationController::class, 'index']);
+//         Route::get('/unread-count', [NotificationController::class, 'getUnreadCount']);
+//         Route::post('/{notification}/read', [NotificationController::class, 'markAsRead']);
+//         Route::post('/read-all', [NotificationController::class, 'markAllAsRead']);
+//         Route::delete('/{notification}', [NotificationController::class, 'destroy']);
+//     });
+    

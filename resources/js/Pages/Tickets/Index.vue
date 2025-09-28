@@ -1,172 +1,145 @@
 <template>
-  <Head title="إدارة التذاكر" />
-
-  <div class="flex h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- القائمة الجانبية -->
-    <aside class="hidden lg:block w-64 bg-white dark:bg-gray-800 shadow-lg border-l border-gray-200 dark:border-gray-700 order-2">
-      <!-- نفس القائمة الجانبية من Dashboard.vue -->
-      <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between">
-          <div class="text-right flex-1">
-            <h1 class="text-xl font-bold text-gray-800 dark:text-white">EventHub</h1>
-            <p class="text-sm text-gray-600 dark:text-gray-300">نظام الفعاليات</p>
-          </div>
-          <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span class="text-white">🎪</span>
-          </div>
-        </div>
-      </div>
-
-      <nav class="p-4 space-y-2">
-        <Link :href="route('dashboard')" class="flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-          <span class="text-lg">📊</span>
-          <span class="flex-1 text-right">لوحة التحكم</span>
-        </Link>
-
-        <Link :href="route('events.index')" class="flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-          <span class="text-lg">🎪</span>
-          <span class="flex-1 text-right">إدارة الفعاليات</span>
-        </Link>
-
-        <Link :href="route('tickets.index')" class="flex items-center gap-3 p-3 rounded-lg transition-all duration-200 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-          <span class="text-lg">🎫</span>
-          <span class="flex-1 text-right">إدارة التذاكر</span>
-        </Link>
-
-        <Link :href="route('users.index')" class="flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-          <span class="text-lg">👥</span>
-          <span class="flex-1 text-right">إدارة المستخدمين</span>
-        </Link>
-
-        <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-          <Link :href="route('profile.edit')" class="flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-            <span class="text-lg">⚙️</span>
-            <span class="flex-1 text-right">الإعدادات</span>
-          </Link>
-
-          <form @submit.prevent="logout" class="w-full">
-            <button type="submit" class="flex items-center gap-3 p-3 rounded-lg transition-all duration-200 w-full text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
-              <span class="text-lg">🚪</span>
-              <span class="flex-1 text-right">تسجيل خروج</span>
-            </button>
-          </form>
-        </div>
-      </nav>
-
-      <div class="absolute bottom-0 right-0 left-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <div class="flex items-center gap-3">
-          <div class="flex-1 text-right">
-            <p class="text-sm font-medium text-gray-800 dark:text-white">{{ currentUser.name }}</p>
-            <p class="text-xs text-gray-600 dark:text-gray-300">{{ currentUser.email }}</p>
-          </div>
-          <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center">
-            <span class="text-white font-bold text-sm">{{ currentUserInitials }}</span>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- المحتوى الرئيسي -->
-    <div class="flex-1 flex flex-col overflow-hidden order-1">
-      <!-- الهيدر -->
-      <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between p-4">
-          <div class="flex items-center gap-4">
-            <button @click="toggleMobileMenu" class="lg:hidden text-gray-600 dark:text-gray-300">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-              </svg>
-            </button>
-
-            <div class="flex items-center gap-3">
-              <button class="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg relative">
-                <span class="text-lg">🔔</span>
-              </button>
-
-              <button @click="toggleDarkMode" class="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                <span class="text-lg">{{ isDarkMode ? '🌙' : '☀️' }}</span>
-              </button>
-
-              <div class="text-left hidden sm:block">
-                <span class="text-sm text-gray-500">{{ currentDate }}</span>
+  <AppLayout title="إدارة التذاكر" description="عرض وإدارة جميع التذاكر">
+    <div class="py-6">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- الإحصائيات -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-6 shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-blue-100 text-sm">إجمالي التذاكر</p>
+                <p class="text-3xl font-bold">{{ ticketsData.stats.totalTickets }}</p>
               </div>
+              <div class="text-3xl">🎫</div>
             </div>
           </div>
 
-          <div class="text-right">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">إدارة التذاكر</h2>
-            <p class="text-gray-600 dark:text-gray-300 mt-1">إدارة تذاكر الفعاليات</p>
+          <div class="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg p-6 shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-green-100 text-sm">تذاكر محجوزة</p>
+                <p class="text-3xl font-bold">{{ ticketsData.stats.reservedTickets }}</p>
+              </div>
+              <div class="text-3xl">✅</div>
+            </div>
           </div>
-        </div>
-      </header>
 
-      <!-- محتوى الصفحة -->
-      <main class="flex-1 overflow-y-auto">
-        <div class="py-6">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center py-12">
-              <div class="text-6xl mb-4">🎫</div>
-              <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">صفحة إدارة التذاكر</h3>
-              <p class="text-gray-500 dark:text-gray-400">هذه الصفحة قيد التطوير</p>
+          <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg p-6 shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-yellow-100 text-sm">تذاكر متاحة</p>
+                <p class="text-3xl font-bold">{{ ticketsData.stats.availableTickets }}</p>
+              </div>
+              <div class="text-3xl">🟢</div>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg p-6 shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-purple-100 text-sm">إجمالي الإيرادات</p>
+                <p class="text-3xl font-bold">{{ ticketsData.stats.totalRevenue }} ر.س</p>
+              </div>
+              <div class="text-3xl">💰</div>
             </div>
           </div>
         </div>
-      </main>
+
+        <!-- جدول التذاكر -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">قائمة التذاكر</h3>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-right">
+              <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300">رقم التذكرة</th>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300">الفعالية</th>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300">المستخدم</th>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300">النوع</th>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300">السعر</th>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300">الحالة</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                <tr v-for="ticket in ticketsData.tickets.data" :key="ticket.id" 
+                    class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <td class="px-6 py-4">
+                    <span class="font-mono text-sm bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
+                      {{ ticket.ticket_number || 'غير محدد' }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3 justify-end">
+                      <div class="text-right">
+                        <p class="font-medium text-gray-800 dark:text-white">{{ ticket.event.title }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <p class="font-medium text-gray-800 dark:text-white">
+                      {{ ticket.user?.name || 'غير محدد' }}
+                    </p>
+                  </td>
+                  <td class="px-6 py-4">
+                    <span class="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                      {{ ticket.type }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 font-medium text-gray-800 dark:text-white">
+                    {{ ticket.price }} ر.س
+                  </td>
+                  <td class="px-6 py-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                      {{ ticket.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- إذا ما فيه تذاكر -->
+        <div v-if="ticketsData.tickets.data.length === 0" class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-lg mt-6">
+          <div class="text-6xl mb-4">🎫</div>
+          <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">لا توجد تذاكر</h3>
+          <p class="text-gray-500 dark:text-gray-400 mb-6">لم يتم العثور على أي تذاكر في النظام</p>
+        </div>
+
+      </div>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script setup>
-import { Head, Link, router } from '@inertiajs/vue3'
-import { ref, onMounted, computed } from 'vue'
+import AppLayout from '@/Layouts/Applayout.vue'
+import { ref, onMounted } from 'vue'
 
-const mobileMenuOpen = ref(false)
-const isDarkMode = ref(false)
+const ticketsData = ref({
+  stats: { totalTickets: 0, reservedTickets: 0, availableTickets: 0, totalRevenue: 0 },
+  tickets: { data: [] },
+  events: []
+})
 
-const currentUser = computed(() => {
-  return window.$page?.props?.auth?.user || { 
-    name: 'مستخدم', 
-    email: 'example@email.com' 
+// جلب البيانات من الـ API
+const fetchTickets = async () => {
+  try {
+    const response = await fetch('/api/v1/tickets')
+    const data = await response.json()
+    
+    if (data.success) {
+      ticketsData.value = data
+    }
+  } catch (error) {
+    console.error('Error fetching tickets:', error)
   }
-})
-
-const currentUserInitials = computed(() => {
-  const name = currentUser.value?.name || 'مستخدم'
-  return name.split(' ').map(n => n[0]).join('') || 'U'
-})
-
-const currentDate = computed(() => {
-  return new Date().toLocaleDateString('ar-SA', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-})
-
-const toggleMobileMenu = () => {
-  mobileMenuOpen.value = !mobileMenuOpen.value
-}
-
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value
-  if (isDarkMode.value) {
-    document.documentElement.classList.add('dark')
-    localStorage.setItem('theme', 'dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-    localStorage.setItem('theme', 'light')
-  }
-}
-
-const logout = () => {
-  router.post(route('logout'))
 }
 
 onMounted(() => {
-  if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark')
-    isDarkMode.value = true
-  }
+  fetchTickets()
 })
 </script>

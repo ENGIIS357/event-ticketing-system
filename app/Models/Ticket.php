@@ -15,6 +15,7 @@
 // }
 
 
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,45 +26,46 @@ class Ticket extends Model
     use HasFactory;
 
     protected $fillable = [
-        'event_id',
+        'ticket_number',
+        'event_id', 
+        'user_id',
         'type',
-        'price', 
-        'quantity',
-        'date'
+        'price',
+        'status',
+        'qr_code'
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
-        'date' => 'datetime'
     ];
 
-    // العلاقة: التذكرة تنتمي إلى فعالية
+    /**
+     * العلاقة مع الفعالية
+     */
     public function event()
     {
         return $this->belongsTo(Event::class);
     }
 
-    // العلاقة: التذكرة لها العديد من الحجوزات
-    public function bookings()
+    /**
+     * العلاقة مع المستخدم
+     */
+    public function user()
     {
-        return $this->hasMany(Booking::class);
+        return $this->belongsTo(User::class);
     }
 
-    // دالة مساعدة: عدد التذاكر المباعة
-    public function soldCount()
+    /**
+     * إنشاء رقم تذكرة تلقائي
+     */
+    protected static function boot()
     {
-        return $this->bookings()->sum('quantity');
-    }
+        parent::boot();
 
-    // دالة مساعدة: التذاكر المتاحة
-    public function availableCount()
-    {
-        return $this->quantity - $this->soldCount();
-    }
-
-    // دالة مساعدة: التحقق إذا كانت التذكرة متاحة
-    public function isAvailable()
-    {
-        return $this->availableCount() > 0;
+        static::creating(function ($ticket) {
+            if (empty($ticket->ticket_number)) {
+                $ticket->ticket_number = 'TKT-' . strtoupper(uniqid());
+            }
+        });
     }
 }

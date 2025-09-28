@@ -1,23 +1,7 @@
 <template>
   <Head title="إدارة الفعاليات" />
-
-  <AuthenticatedLayout>
-    <template #header>
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-right">
-        <div class="text-center w-full md:text-right md:w-auto">
-          <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-1">إدارة الفعاليات</h2>
-          <p class="text-sm text-gray-600 dark:text-gray-300">قم بإدارة فعالياتك بكل سهولة</p>
-        </div>
-        <div class="w-full md:w-auto flex justify-center md:justify-end">
-          <button @click="$inertia.visit('/events/create')"
-                  class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-teal-600 text-white px-5 py-3 rounded-lg hover:from-green-600 hover:to-teal-700 transition-all duration-300 shadow-md text-base font-medium">
-            <span class="text-lg">+</span>
-            إضافة فعالية جديدة
-          </button>
-        </div>
-      </div>
-    </template>
-
+  <AppLayout title="إدارة الفعاليات" description="قم بإدارة فعالياتك بكل سهولة">
+    
     <div class="py-4 md:py-6">
       <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
 
@@ -82,6 +66,16 @@
             </div>
           </div>
 
+          <!-- زر الإضافة الجديد -->
+          <div class="flex justify-between items-center mb-4 md:mb-6">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">فعالياتي</h2>
+            <button @click="goToCreate" 
+                    class="bg-gradient-to-r from-green-500 to-teal-600 text-white px-4 py-2.5 rounded-lg hover:from-green-600 hover:to-teal-700 transition-all duration-300 flex items-center gap-2 text-sm font-medium">
+              <span>➕</span>
+              إضافة فعالية جديدة
+            </button>
+          </div>
+
           <!-- قائمة الفعاليات -->
           <div v-if="filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             <div v-for="event in filteredEvents" :key="event.id" 
@@ -136,8 +130,11 @@
                     <span>✏️</span>
                     تعديل
                   </button>
-                  <button v-if="event.user.id === currentUserId" @click="deleteEvent(event.id)" 
-                          class="flex-1 bg-red-500 text-white py-2 px-3 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-1 text-sm font-medium">
+                  <button 
+                    v-if="event.user.id === currentUserId" 
+                    @click="deleteEvent(event.id)" 
+                    class="flex-1 bg-red-500 text-white py-2 px-3 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-1 text-sm font-medium"
+                  >
                     <span>🗑️</span>
                     حذف
                   </button>
@@ -150,7 +147,7 @@
             <div class="text-4xl md:text-6xl mb-3">🎪</div>
             <h3 class="text-lg md:text-xl font-semibold text-gray-700 dark:text-gray-300">لا توجد فعاليات</h3>
             <p class="text-gray-500 dark:text-gray-400 mt-1 mb-4 text-sm md:text-base">ابدأ بإضافة أول فعالية لك</p>
-            <button @click="$inertia.visit('/events/create')" 
+            <button @click="goToCreate" 
                     class="bg-gradient-to-r from-green-500 to-teal-600 text-white px-5 py-3 rounded-lg hover:from-green-600 hover:to-teal-700 transition-all duration-300 text-base font-medium">
               إضافة فعالية جديدة
             </button>
@@ -158,14 +155,14 @@
         </div>
       </div>
     </div>
-  </AuthenticatedLayout>
+  </AppLayout>
 </template>
 
 <script setup>
 import { Head } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import AppLayout from '@/Layouts/Applayout.vue'
 
 // المتغيرات التفاعلية
 const loading = ref(true)
@@ -175,7 +172,7 @@ const searchQuery = ref('')
 const filterStatus = ref('all')
 
 // المعرف الحالي للمستخدم المسجل
-const currentUserId = ref(2) // استبدل هذا بالقيمة الفعلية من props أو page.props.auth.user.id
+const currentUserId = ref(2)
 
 // الدوال المحسوبة
 const filteredEvents = computed(() => {
@@ -199,7 +196,6 @@ const filteredEvents = computed(() => {
   return filtered.sort((a,b) => new Date(b.start_date) - new Date(a.start_date))
 })
 
-// إحصائيات محسوبة
 const activeEventsCount = computed(() => {
   return events.value.filter(event => new Date(event.start_date) > new Date()).length
 })
@@ -231,20 +227,33 @@ const fetchEvents = async () => {
   }
 }
 
+const goToCreate = () => {
+  router.visit('/events/create')
+}
+
 const viewEvent = (event) => router.visit(`/events/${event.id}`)
 const editEvent = (event) => router.visit(`/events/${event.id}/edit`)
 
-const deleteEvent = async (id) => {
+const deleteEvent = async (eventId) => {
   if (!confirm('هل أنت متأكد من حذف هذه الفعالية؟')) return
+  
   try {
-    const response = await fetch(`/api/v1/events/${id}`, {
+    const response = await fetch(`/events/${eventId}`, {
       method: 'DELETE',
-      headers: { 'Accept': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
     })
-    if (response.ok) await fetchEvents()
-    else throw new Error('فشل في الحذف')
+    
+    if (response.ok) {
+      events.value = events.value.filter(event => event.id !== eventId)
+    } else {
+      throw new Error('فشل في حذف الفعالية')
+    }
   } catch (err) {
-    alert('❌ فشل في حذف الفعالية')
+    alert('❌ فشل في حذف الفعالية: ' + err.message)
   }
 }
 
@@ -271,27 +280,5 @@ onMounted(() => fetchEvents())
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-/* تحسينات للعرض على الجوال */
-@media (max-width: 640px) {
-  .grid.grid-cols-2 { 
-    grid-template-columns: 1fr; 
-    gap: 0.75rem;
-  }
-}
-
-/* تحسينات للعرض على الأجهزة اللوحية */
-@media (min-width: 641px) and (max-width: 1024px) {
-  .grid.grid-cols-2 { 
-    grid-template-columns: repeat(2, 1fr); 
-  }
-}
-
-/* تحسينات للعرض على الشاشات الكبيرة */
-@media (min-width: 1025px) {
-  .grid.grid-cols-3 { 
-    grid-template-columns: repeat(3, 1fr); 
-  }
 }
 </style>
