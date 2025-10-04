@@ -339,8 +339,8 @@ const loading = ref(true)
 // تحقق من وجود المستخدم المسجل
 const currentUser = computed(() => {
   return window.$page?.props?.auth?.user || { 
-    name: 'مستخدم', 
-    email: 'example@email.com' 
+    name: 'wiam', 
+    email: 'wiam@gmail.com' 
   }
 })
 

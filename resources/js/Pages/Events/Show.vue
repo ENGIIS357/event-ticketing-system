@@ -1,6 +1,9 @@
 <template>
   <Head title="عرض الفعالية" />
-
+<EventHeader 
+    :title="event.title" 
+    subtitle="تفاصيل الفعالية" 
+    back-url="/events" />
   <AuthenticatedLayout>
     <template #header>
       <div class="flex justify-between items-center text-right">
@@ -67,8 +70,8 @@
 
 <script setup>
 import { Head, usePage } from '@inertiajs/vue3'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-
+//import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import EventHeader from '@/Components/EventHeader.vue'
 const props = usePage().props
 const event = props.event || {}
 

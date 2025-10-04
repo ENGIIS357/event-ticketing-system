@@ -57,9 +57,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Traits\HasRoles; 
 
-    // باقي الكود
-
-// ... الكود الحالي
+    
 
 class User extends Authenticatable
 {use HasFactory;

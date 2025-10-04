@@ -191,6 +191,9 @@ class TicketController extends Controller
                 'message' => 'فشل في تحميل الإحصائيات',
                 'error' => $e->getMessage()
             ], 500);
+         
+
+Route::get('/tickets-management', [TicketsManagementController::class, 'index'])->name('tickets.management');
         }
     }
 }

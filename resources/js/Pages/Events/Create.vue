@@ -15,6 +15,20 @@
       </div>
     </template>
 
+    <!-- إشعار النجاح -->
+    <div v-if="showSuccess" 
+         class="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+      <span class="font-semibold">تم إضافة الفعالية بنجاح!</span>
+      <button @click="showSuccess = false" class="text-white hover:text-gray-200">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
     <div class="py-6">
       <div class="max-w-4xl mx-auto">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -148,18 +162,43 @@ export default {
         available_tickets: 1,
       },
       saving: false,
+      showSuccess: false,
     }
   },
   methods: {
-    submitEvent() {
+    async submitEvent() {
       this.saving = true
-      Inertia.post('/events', this.form)
-        .then(() => {
-          this.saving = false
-        })
-        .catch(() => {
-          this.saving = false
-        })
+      this.showSuccess = false
+      
+      try {
+        await Inertia.post('/events', this.form)
+        
+        // عرض الإشعار بعد النجاح
+        this.showSuccess = true
+        this.resetForm()
+        
+        // الانتقال إلى صفحة الفعاليات بعد ثانيتين
+        setTimeout(() => {
+          Inertia.visit('/events')
+        }, 2000)
+        
+      } catch (error) {
+        console.log('Error:', error)
+      } finally {
+        this.saving = false
+      }
+    },
+    
+    resetForm() {
+      this.form = {
+        title: '',
+        description: '',
+        location: '',
+        start_date: '',
+        end_date: '',
+        price: 0,
+        available_tickets: 1,
+      }
     }
   }
 }

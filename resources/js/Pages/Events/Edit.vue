@@ -1,7 +1,11 @@
 <template>
   <Head :title="'تعديل الفعالية - ' + event.title" />
-
+<EventHeader 
+    :title="event.title" 
+    subtitle="تفاصيل الفعالية" 
+    back-url="/events" />
   <AuthenticatedLayout>
+    <!-- الهيدر -->
     <template #header>
       <div class="flex justify-between items-center text-right">
         <div>
@@ -15,10 +19,11 @@
       </div>
     </template>
 
+    <!-- المحتوى -->
     <div class="py-6 max-w-4xl mx-auto text-right">
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="p-8 space-y-6">
-          <form @submit.prevent="updateEvent" class="space-y-4">
+          <form @submit.prevent="confirmUpdate" class="space-y-4">
 
             <!-- اسم الفعالية -->
             <div>
@@ -76,7 +81,7 @@
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">عدد التذاكر *</label>
-                <input v.model.number="form.available_tickets" type="number" min="1" required
+                <input v-model.number="form.available_tickets" type="number" min="1" required
                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
                               focus:ring-2 focus:ring-green-500 focus:border-transparent
                               dark:bg-gray-700 dark:text-white text-right" dir="rtl">
@@ -89,11 +94,13 @@
             </div>
 
             <!-- أزرار الإجراءات -->
-            <div class="flex justify-start gap-3 pt-4">
+            <div class="flex justify-between pt-4">
+              <!-- حفظ يمين -->
               <button type="submit" 
                       class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium">
                 💾 حفظ التغييرات
               </button>
+              <!-- إلغاء يسار -->
               <button type="button" @click="$inertia.visit('/events')" 
                       class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 إلغاء
@@ -111,8 +118,8 @@
 import { Head } from '@inertiajs/vue3'
 import { reactive, ref } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-
+// import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import EventHeader from '@/Components/EventHeader.vue'
 const props = usePage().props
 const event = props.event || {}
 const currentUserId = props.auth.user.id
@@ -124,7 +131,7 @@ if (!event.id || event.user.id !== currentUserId) {
 
 // نموذج التعديل
 const form = reactive({
-  id: event.id, // ⭐ مهم
+  id: event.id,
   title: event.title || '',
   description: event.description || '',
   location: event.location || '',
@@ -138,13 +145,20 @@ const form = reactive({
 const message = ref('')
 const messageClass = ref('')
 
-// دالة الحفظ المعدلة
+// دالة التأكيد قبل التعديل
+const confirmUpdate = () => {
+  if (confirm("هل تريد تعديل بيانات الفعالية؟")) {
+    updateEvent()
+  }
+}
+
+// دالة الحفظ
 const updateEvent = async () => {
   try {
     await router.put(route('events.update', event.id), form, {
       preserveScroll: true,
       onSuccess: () => {
-        message.value = 'تم تعديل الفعالية بنجاح!'
+        message.value = 'تم تعديل الفعالية بنجاح! ✅'
         messageClass.value = 'bg-green-100 text-green-800 border border-green-200'
       },
       onError: (errors) => {
